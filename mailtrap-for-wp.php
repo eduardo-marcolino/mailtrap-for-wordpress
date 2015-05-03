@@ -54,19 +54,20 @@ final class MailtrapPlugin {
     add_action( 'phpmailer_init', array($this, 'mailer_setup' ) );
     add_action( 'admin_menu', array($this, 'menu_setup' ) );  
     add_action( 'admin_init', array($this, 'register_settings') );
+    load_plugin_textdomain( 'mailtrap-for-wp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); 
   }
   
   public function menu_setup() {
-    add_options_page('Mailtrap for Wordpress', 'Mailtrap', 'manage_options', 'mailtrap-settings', array($this, 'settings_page' ));
-    add_submenu_page(null, 'Mailtrap for Wordpress', 'Mailtrap Test', 'manage_options', 'mailtrap-test', array($this, 'test_page' ));
+    add_options_page( 'Mailtrap for Wordpress', 'Mailtrap', 'manage_options', 'mailtrap-settings', array($this, 'settings_page' ) );
+    add_submenu_page( null, 'Mailtrap for Wordpress', 'Mailtrap Test', 'manage_options', 'mailtrap-test', array($this, 'test_page' ));
   }
   
   public function settings_page() {
     include $this->plugin_path.'/includes/settings.php';
   }
   
-  public function test_page() {
-    
+  public function test_page() 
+  {    
     if($_SERVER['REQUEST_METHOD'] == 'POST') 
     {
       if (!wp_verify_nonce( $_POST['_wpnonce'], 'mailtrap_test_action' ) ) {
@@ -83,9 +84,9 @@ final class MailtrapPlugin {
   {
     register_setting( 'mailtrap-settings', 'mailtrap_enabled' );
     register_setting( 'mailtrap-settings', 'mailtrap_port' );
-	register_setting( 'mailtrap-settings', 'mailtrap_username' );
-	register_setting( 'mailtrap-settings', 'mailtrap_password' );
-	register_setting( 'mailtrap-settings', 'mailtrap_secure' );
+    register_setting( 'mailtrap-settings', 'mailtrap_username' );
+    register_setting( 'mailtrap-settings', 'mailtrap_password' );
+    register_setting( 'mailtrap-settings', 'mailtrap_secure' );
   }
   
   public function mailer_setup(PHPMailer $phpmailer) 
