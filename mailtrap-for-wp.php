@@ -2,7 +2,7 @@
 /*
 Plugin Name: Mailtrap for WordPress
 Plugin URI: http://eduardomarcolino.com/plugins/mailtrap-for-wordpress
-Description: 
+Description: Easily configure wordpress to send emails to Mailtrap.io
 Version: 0.0.1
 Author: Eduardo Marcolino
 Author URI: http://eduardomarcolino.com
@@ -31,46 +31,78 @@ if( ! defined( 'ABSPATH' ) ) {
   exit;
 }
 
-if ( ! class_exists( 'Mailtrap' ) ) :
+if ( ! class_exists( 'MailtrapPlugin' ) ) :
   
-class Mailtrap {
+final class MailtrapPlugin {
   
-  public $version = '0.0.1';
+  public 
+    $plugin_url,
+    $plugin_path
+  ;
   
-  /**
-   * Instantiate Mailtrap class
-   * @return void
-   */
   public static function init() 
   {
-    $plugin = new Mailtrap();
+    $plugin = new MailtrapPlugin();
     $plugin->plugin_setup(); 
   }
   
-  /**
-   * Setting up actions and filters
-   * @return void
-   */
   public function plugin_setup() 
   {
     $this->plugin_url    = plugins_url( '/', __FILE__ );
     $this->plugin_path   = plugin_dir_path( __FILE__ );
     
     add_action( 'phpmailer_init', array($this, 'mailer_setup' ) );
+    add_action( 'admin_menu', array($this, 'menu_setup' ) );  
+    add_action( 'admin_init', array($this, 'register_settings') );
   }
   
+  public function menu_setup() {
+    add_options_page('Mailtrap for Wordpress', 'Mailtrap', 'manage_options', 'mailtrap-settings', array($this, 'settings_page' ));
+    add_submenu_page(null, 'Mailtrap for Wordpress', 'Mailtrap Test', 'manage_options', 'mailtrap-test', array($this, 'test_page' ));
+  }
+  
+  public function settings_page() {
+    include $this->plugin_path.'/includes/settings.php';
+  }
+  
+  public function test_page() {
+    
+    if($_SERVER['REQUEST_METHOD'] == 'POST') 
+    {
+      if (!wp_verify_nonce( $_POST['_wpnonce'], 'mailtrap_test_action' ) ) {
+        die( 'Failed security check' );
+      }
+      
+      wp_mail( $_POST['to'], __( 'Mailtrap for Wordpress Plugin', 'mailtrap-for-wp' ), $_POST['message']);
+    }
+      
+    include $this->plugin_path.'/includes/test.php';
+  }
+  
+  public function register_settings() 
+  {
+    register_setting( 'mailtrap-settings', 'mailtrap_enabled' );
+    register_setting( 'mailtrap-settings', 'mailtrap_port' );
+	register_setting( 'mailtrap-settings', 'mailtrap_username' );
+	register_setting( 'mailtrap-settings', 'mailtrap_password' );
+	register_setting( 'mailtrap-settings', 'mailtrap_secure' );
+  }
   
   public function mailer_setup(PHPMailer $phpmailer) 
   {
-    $phpmailer->IsSMTP();
-    $phpmailer->Host = '';
-    $phpmailer->Port = '';
-    $phpmailer->SMTPAuth = '';
-    $phpmailer->Username = '';
-    $phpmailer->Password = '';
+    if(get_option('mailtrap_enabled', false))
+    {
+      $phpmailer->IsSMTP();
+      $phpmailer->Host = 'mailtrap.io';
+      $phpmailer->SMTPAuth = true;
+      $phpmailer->Port = get_option('mailtrap_port');
+      $phpmailer->Username = get_option('mailtrap_username');
+      $phpmailer->Password = get_option('mailtrap_password');
+      $phpmailer->SMTPSecure = get_option('mailtrap_secure');
+    }
   }
 }
 
-add_action( 'plugins_loaded', array( 'Mailtrap', 'init' ) );
+add_action( 'plugins_loaded', array( 'MailtrapPlugin', 'init' ) );
 
 endif;
