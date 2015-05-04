@@ -1,6 +1,6 @@
 === Mailtrap for WordPress ===
 Contributors: eduardo.marcolino
-Tags: mailtrap,smtp,woocommerce,buddypress,mailtrap for wp,email,email test
+Tags: mailtrap,smtp,mailtrap for wp,email,email test,smtp test
 Requires at least: 3.0
 Tested up to: 4.2
 Stable tag: 0.2
