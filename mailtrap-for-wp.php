@@ -3,7 +3,7 @@
 Plugin Name: Mailtrap for WordPress
 Plugin URI: http://eduardomarcolino.com/plugins/mailtrap-for-wordpress
 Description: Easily configure wordpress to send emails to Mailtrap.io
-Version: 0.1
+Version: 0.2
 Author: Eduardo Marcolino
 Author URI: http://eduardomarcolino.com
 Text Domain: mailtraṕ-for-wp

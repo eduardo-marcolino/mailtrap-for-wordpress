@@ -11,9 +11,11 @@ Easily test your wordpress emails without spamming real customers using mailtrap
 
 == Description ==
 
+**IMPORTANT: This is a 3d party and non-official plugin**
+
 This plugin allows you to send all emails to your Mailtrap.io account.
 
-[Mailtrap](http://mailtrap.io) is a fake SMTP server for development teams to test, view and share emails sent from the development and staging environments without spamming real customers.
+[Mailtrap](http://mailtrap.io) is a fake SMTP server solution that allows testing email notifications without sending them to the real users of your application. Not only does Mailtrap work as a powerful email test tool, it also lets you view your dummy emails online, forward them to your regular mailbox, share with the team and more! Mailtrap is a mail server test tool built by Railsware Products, Inc., a premium software development consulting company.
 
 
 == Installation ==
@@ -25,6 +27,10 @@ Setting up Mailtrap for Wordpress is very simple. Follow these easy steps
 3.	Go to the settings menu and click on Mailtrap
 
 == Changelog ==
+
+= 0.2 =
+*	Updating readme file to match Mailtrap request
+*	Updating banner and logo
 
 = 0.1 =
 *	First version of the plugin released
