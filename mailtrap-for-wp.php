@@ -94,7 +94,7 @@ final class MailtrapPlugin {
     if(get_option('mailtrap_enabled', false))
     {
       $phpmailer->IsSMTP();
-      $phpmailer->Host = 'mailtrap.io';
+      $phpmailer->Host = 'smtp.mailtrap.io';
       $phpmailer->SMTPAuth = true;
       $phpmailer->Port = get_option('mailtrap_port');
       $phpmailer->Username = get_option('mailtrap_username');
