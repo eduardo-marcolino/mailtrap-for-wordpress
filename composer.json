@@ -1,0 +1,16 @@
+{
+	"name"       : "eduardo-marcolino/mailtrap-for-wordpress",
+	"description": "Mailtrap for Wordpress",
+	"homepage"   : "https://github.com/eduardo-marcolino/mailtrap-for-wordpress",
+	"type"       : "wordpress-plugin",
+	"keywords"   : ["wordpress","plugin","wp","mailtrap","email test","test","smtp","fake"],
+	"license"    : "GPL-2.0+",
+	"authors"    : [{
+		"name"    : "Eduardo Marcolino",
+		"homepage": "http://eduardomarcolino.com"
+	}],
+	"require": {
+		"composer/installers": "~1.0",
+		"php": ">=5.3"
+	}
+}

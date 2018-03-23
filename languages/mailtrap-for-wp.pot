@@ -66,3 +66,11 @@ msgstr ""
 #: includes/test.php:20
 msgid "Send"
 msgstr ""
+
+#: includes/notices.php:3
+msgid "Your email has been sent successfully"
+msgstr ""
+
+#: includes/notices.php:9
+msgid "Email Delivery Failure. Please check your credentials"
+msgstr ""

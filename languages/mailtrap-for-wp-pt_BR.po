@@ -67,3 +67,11 @@ msgstr "Esse é um email de teste do plugin Mailtrap for Wordpress"
 msgid "Send"
 msgstr "Enviar"
 
+#: /var/www/pessoais/mailtrap-for-wordpress/includes/notices.php.php:3
+msgid "Your email has been sent successfully"
+msgstr "Seu email foi enviado com sucesso"
+
+#: /var/www/pessoais/mailtrap-for-wordpress/includes/notices.php.php:9
+msgid "Email Delivery Failure. Please check your credentials"
+msgstr "Falha ao enviar email. Por favor verifique suas credenciais"
+

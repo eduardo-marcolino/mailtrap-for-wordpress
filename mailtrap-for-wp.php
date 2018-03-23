@@ -3,10 +3,10 @@
 Plugin Name: Mailtrap for WordPress
 Plugin URI: http://eduardomarcolino.com/plugins/mailtrap-for-wordpress
 Description: Easily configure wordpress to send emails to Mailtrap.io
-Version: 0.2
+Version: 0.3
 Author: Eduardo Marcolino
 Author URI: http://eduardomarcolino.com
-Text Domain: mailtraṕ-for-wp
+Text Domain: mailtrap-for-wp
 Domain Path: /languages
 License: GPL v2
 GitHub Plugin URI: https://github.com/eduardo-marcolino/mailtrap-for-wordpress
@@ -68,18 +68,28 @@ final class MailtrapPlugin {
   
   public function test_page() 
   {    
+    $email_sent == null;
+    
     if($_SERVER['REQUEST_METHOD'] == 'POST') 
     {
       if (!wp_verify_nonce( $_POST['_wpnonce'], 'mailtrap_test_action' ) ) {
         die( 'Failed security check' );
       }
       
-      wp_mail( $_POST['to'], __( 'Mailtrap for Wordpress Plugin', 'mailtrap-for-wp' ), $_POST['message']);
+      $email_sent = wp_mail( $_POST['to'], __( 'Mailtrap for Wordpress Plugin', 'mailtrap-for-wp' ), $_POST['message']);
     }
       
     include $this->plugin_path.'/includes/test.php';
   }
   
+  public function sample_admin_notice__success() {
+    ?>
+    <div class="notice notice-success is-dismissible">
+        <p><?php _e( 'Done!', 'sample-text-domain' ); ?></p>
+    </div>
+    <?php
+  }
+
   public function register_settings() 
   {
     register_setting( 'mailtrap-settings', 'mailtrap_enabled' );
@@ -87,6 +97,7 @@ final class MailtrapPlugin {
     register_setting( 'mailtrap-settings', 'mailtrap_username' );
     register_setting( 'mailtrap-settings', 'mailtrap_password' );
     register_setting( 'mailtrap-settings', 'mailtrap_secure' );
+    register_setting( 'mailtrap-settings', 'mailtrap_api_token' );
   }
   
   public function mailer_setup(PHPMailer $phpmailer) 
@@ -94,7 +105,7 @@ final class MailtrapPlugin {
     if(get_option('mailtrap_enabled', false))
     {
       $phpmailer->IsSMTP();
-      $phpmailer->Host = 'mailtrap.io';
+      $phpmailer->Host = 'smtp.mailtrap.io';
       $phpmailer->SMTPAuth = true;
       $phpmailer->Port = get_option('mailtrap_port');
       $phpmailer->Username = get_option('mailtrap_username');

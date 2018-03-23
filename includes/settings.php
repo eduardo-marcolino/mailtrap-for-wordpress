@@ -33,6 +33,16 @@
         <th scope="row"><?php echo __( 'Use TLS', 'mailtrap-for-wp' ) ?></th>
         <td><input type="checkbox" name="mailtrap_secure" value="tls" <?php echo get_option('mailtrap_secure') === 'tls' ? 'checked' : '' ?> /></td>
       </tr>
+      <tr>
+        <td colspan="2"><hr></td>
+      </tr>
+      <tr>
+        <th scope="row"><?php echo __( 'API Token', 'mailtrap-for-wp' ) ?></th>
+        <td>
+          <input type="text" name="mailtrap_api_token" value="<?php echo esc_attr( get_option('mailtrap_api_token') ); ?>" /><br>
+          <small><a href="https://mailtrap.io/public-api" target="blank">https://mailtrap.io/public-api</a></small>
+        </td>
+      </tr>
     </table>
     
     <?php submit_button(); ?>

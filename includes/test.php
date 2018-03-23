@@ -1,5 +1,6 @@
 <div class="wrap">
   <?php include 'page-header.php'; ?>
+  <?php include 'notices.php'; ?>
   
   <p><?php echo __( 'This test sends an email using standard wp_mail function.', 'mailtrap-for-wp' ) ?></p>
   <form action="<?php echo admin_url('admin.php?page=mailtrap-test'); ?>" method="post">

@@ -1,0 +1,37 @@
+version: '3'
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: mailtrap-web
+    ports:
+      - "8007:80"
+    volumes:
+      - .:/var/www/html/wp-content/plugins/mailtrap-for-wp
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: mailtrap
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+    depends_on:
+      - db
+    networks:
+      - mailtrap
+  db:
+    image: mysql
+    container_name: mailtrap-db
+    networks:
+      - mailtrap
+    ports:
+      - "3306:3306"
+    volumes:
+      - data_volume:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mailtrap
+
+networks:
+  mailtrap:
+    driver: bridge
+
+volumes:
+  data_volume:
