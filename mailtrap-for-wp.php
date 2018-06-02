@@ -68,7 +68,7 @@ final class MailtrapPlugin {
   
   public function test_page() 
   {    
-    $email_sent == null;
+    $email_sent = null;
     
     if($_SERVER['REQUEST_METHOD'] == 'POST') 
     {
