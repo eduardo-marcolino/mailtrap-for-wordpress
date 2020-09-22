@@ -3,7 +3,7 @@
 Plugin Name: Mailtrap for WordPress
 Plugin URI: http://eduardomarcolino.com/plugins/mailtrap-for-wordpress
 Description: Easily configure wordpress to send emails to Mailtrap.io
-Version: 0.3
+Version: 0.4
 Author: Eduardo Marcolino
 Author URI: http://eduardomarcolino.com
 Text Domain: mailtrap-for-wp
@@ -13,7 +13,7 @@ GitHub Plugin URI: https://github.com/eduardo-marcolino/mailtrap-for-wordpress
 
 Mailtrap for WordPress
 Copyright (C) 2015, Eduardo Marcolino, eduardo.marcolino@gmail.com
- 
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or
@@ -32,56 +32,56 @@ if( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'MailtrapPlugin' ) ) :
-  
+
 final class MailtrapPlugin {
-  
-  public 
+
+  public
     $plugin_url,
     $plugin_path
   ;
-  
-  public static function init() 
+
+  public static function init()
   {
     $plugin = new MailtrapPlugin();
-    $plugin->plugin_setup(); 
+    $plugin->plugin_setup();
   }
-  
-  public function plugin_setup() 
+
+  public function plugin_setup()
   {
     $this->plugin_url    = plugins_url( '/', __FILE__ );
     $this->plugin_path   = plugin_dir_path( __FILE__ );
-    
+
     add_action( 'phpmailer_init', array($this, 'mailer_setup' ) );
-    add_action( 'admin_menu', array($this, 'menu_setup' ) );  
+    add_action( 'admin_menu', array($this, 'menu_setup' ) );
     add_action( 'admin_init', array($this, 'register_settings') );
-    load_plugin_textdomain( 'mailtrap-for-wp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); 
+    load_plugin_textdomain( 'mailtrap-for-wp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
   }
-  
+
   public function menu_setup() {
     add_options_page( 'Mailtrap for Wordpress', 'Mailtrap', 'manage_options', 'mailtrap-settings', array($this, 'settings_page' ) );
     add_submenu_page( null, 'Mailtrap for Wordpress', 'Mailtrap Test', 'manage_options', 'mailtrap-test', array($this, 'test_page' ));
   }
-  
+
   public function settings_page() {
     include $this->plugin_path.'/includes/settings.php';
   }
-  
-  public function test_page() 
-  {    
+
+  public function test_page()
+  {
     $email_sent = null;
-    
-    if($_SERVER['REQUEST_METHOD'] == 'POST') 
+
+    if($_SERVER['REQUEST_METHOD'] == 'POST')
     {
       if (!wp_verify_nonce( $_POST['_wpnonce'], 'mailtrap_test_action' ) ) {
         die( 'Failed security check' );
       }
-      
+
       $email_sent = wp_mail( $_POST['to'], __( 'Mailtrap for Wordpress Plugin', 'mailtrap-for-wp' ), $_POST['message']);
     }
-      
+
     include $this->plugin_path.'/includes/test.php';
   }
-  
+
   public function sample_admin_notice__success() {
     ?>
     <div class="notice notice-success is-dismissible">
@@ -90,7 +90,7 @@ final class MailtrapPlugin {
     <?php
   }
 
-  public function register_settings() 
+  public function register_settings()
   {
     register_setting( 'mailtrap-settings', 'mailtrap_enabled' );
     register_setting( 'mailtrap-settings', 'mailtrap_port' );
@@ -99,8 +99,8 @@ final class MailtrapPlugin {
     register_setting( 'mailtrap-settings', 'mailtrap_secure' );
     register_setting( 'mailtrap-settings', 'mailtrap_api_token' );
   }
-  
-  public function mailer_setup(PHPMailer $phpmailer) 
+
+  public function mailer_setup($phpmailer)
   {
     if(get_option('mailtrap_enabled', false))
     {
