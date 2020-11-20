@@ -3,7 +3,7 @@
 Plugin Name: Mailtrap for WordPress
 Plugin URI: http://eduardomarcolino.com/plugins/mailtrap-for-wordpress
 Description: Easily configure wordpress to send emails to Mailtrap.io
-Version: 0.4
+Version: 0.5
 Author: Eduardo Marcolino
 Author URI: http://eduardomarcolino.com
 Text Domain: mailtrap-for-wp
@@ -54,6 +54,11 @@ final class MailtrapPlugin {
     add_action( 'phpmailer_init', array($this, 'mailer_setup' ) );
     add_action( 'admin_menu', array($this, 'menu_setup' ) );
     add_action( 'admin_init', array($this, 'register_settings') );
+    add_action( 'wp_mail_failed', array($this, 'wp_mail_failed'), 99, 1 );
+
+    add_filter( 'wp_mail_from', array($this, 'filter_mail_from') );
+    add_filter( 'wp_mail_from_name', array($this, 'filter_mail_from_name') );
+
     load_plugin_textdomain( 'mailtrap-for-wp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
   }
 
@@ -62,8 +67,22 @@ final class MailtrapPlugin {
     add_submenu_page( null, 'Mailtrap for Wordpress', 'Mailtrap Test', 'manage_options', 'mailtrap-test', array($this, 'test_page' ));
   }
 
+  public function wp_mail_failed($wp_error) {
+    echo sprintf('<div class="notice notice-error"><p>%s</p></div>',
+      __( 'Email Delivery Failure:').$wp_error->get_error_message()
+    );
+  }
+
   public function settings_page() {
     include $this->plugin_path.'/includes/settings.php';
+  }
+
+  public function filter_mail_from($value) {
+    return get_option('admin_email');
+  }
+
+  public function filter_mail_from_name($value) {
+    return get_option('blogname');
   }
 
   public function test_page()
