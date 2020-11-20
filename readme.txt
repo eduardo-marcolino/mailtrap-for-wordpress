@@ -3,7 +3,7 @@ Contributors: eduardo.marcolino
 Tags: mailtrap,smtp,mailtrap for wp,email,email test,smtp test
 Requires at least: 3.0
 Tested up to: 5.5.3
-Stable tag: 0.5
+Stable tag: 0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,13 @@ Setting up Mailtrap for Wordpress is very simple. Follow these easy steps
 3.	Go to the settings menu and click on Mailtrap
 
 == Changelog ==
+
+= 0.6 =
+*	Updating Changelog
+
+= 0.5 =
+*	Fixing wp_mail from mail and name header
+* Improving error message
 
 = 0.4 =
 *	Fixing PHPMailer namespace
