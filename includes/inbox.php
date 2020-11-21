@@ -30,10 +30,10 @@
           <?php foreach($messages as $message): ?>
             <?php $is_current_item = $current_message && $message->id == $current_message->id;  ?>
             <li style="<?php echo $is_current_item ? 'background: #00b08c;' : ($message->is_read ? 'background: #eee;' : '') ?>display:flex; flex-direction: column; padding: 15px 10px 5px 20px; border-bottom: 1px solid #eee;margin:0;">
-              <a style="<?php echo $is_current_item ? 'color: #fff;' : 'color: #292929;' ?><?php echo !$message->is_read ? 'font-weight: bold' : '' ?>;font-size:1rem;text-decoration:none" href="<?php echo admin_url('admin.php?page=mailtrap-inbox&inbox_id='.$message->inbox_id.'&message_id='.$message->id); ?>"><?php echo $message->subject ?></a>
-              <p style="display:flex;justify-content: space-between;<?php echo $is_current_item ? 'color: #fff;' : '' ?>">
-                <span>To: <?php echo $message->to_email ?></span>
-                <span><?php echo MailtrapAPIClient::time2str($message->sent_at) ?></span>
+              <a style="<?php echo $is_current_item ? 'color: #fff;' : 'color: #292929;' ?><?php echo !$message->is_read ? 'font-weight: bold' : '' ?>;font-size:0.9rem;margin-bottom:1px;text-decoration:none" href="<?php echo admin_url('admin.php?page=mailtrap-inbox&inbox_id='.$message->inbox_id.'&message_id='.$message->id); ?>"><?php echo $message->subject ?></a>
+              <p style="margin:2px 0;display:flex;justify-content: space-between;<?php echo $is_current_item ? 'color: #fff;' : '' ?>">
+                <span style="font-size:0.6rem">To: <?php echo $message->to_email ?></span>
+                <span style="font-size:0.6rem;flex-shrink: 0;"><?php echo MailtrapAPIClient::time2str($message->sent_at) ?></span>
               </p>
             </li>
           <?php endforeach; ?>
@@ -44,7 +44,7 @@
 
           <?php if ($current_message): ?>
             <div style="border-bottom:1px solid #ccc;margin-bottom:25px">
-              <h2 style="font-size:1.5rem"><?php echo $current_message->subject ?> <small style="font-size: 1rem; float: right"><?php echo date('Y-m-d H:i', strtotime($current_message->sent_at)) ?></small></h2>
+              <h2 style="font-size:1.5rem"><?php echo $current_message->subject ?> <small style="font-size: 0.7rem; float: right"><?php echo date('Y-m-d H:i', strtotime($current_message->sent_at)) ?></small></h2>
               <p>
                 From: <?php echo $current_message->from_name ?> &lt;<?php echo $current_message->from_email ?>&gt; <br>
                 To: <?php echo $current_message->to_name ?> &lt;<?php echo $current_message->to_email ?>&gt;
