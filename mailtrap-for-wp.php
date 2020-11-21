@@ -3,7 +3,7 @@
 Plugin Name: Mailtrap for WordPress
 Plugin URI: http://eduardomarcolino.com/plugins/mailtrap-for-wordpress
 Description: Easily configure wordpress to send emails to Mailtrap.io
-Version: 0.6
+Version: 0.7
 Author: Eduardo Marcolino
 Author URI: http://eduardomarcolino.com
 Text Domain: mailtrap-for-wp
@@ -65,6 +65,7 @@ final class MailtrapPlugin {
   public function menu_setup() {
     add_options_page( 'Mailtrap for Wordpress', 'Mailtrap', 'manage_options', 'mailtrap-settings', array($this, 'settings_page' ) );
     add_submenu_page( null, 'Mailtrap for Wordpress', 'Mailtrap Test', 'manage_options', 'mailtrap-test', array($this, 'test_page' ));
+    add_submenu_page( null, 'Mailtrap for Wordpress', 'Mailtrap Inbox', 'manage_options', 'mailtrap-inbox', array($this, 'inbox_page' ));
   }
 
   public function wp_mail_failed($wp_error) {
@@ -101,12 +102,8 @@ final class MailtrapPlugin {
     include $this->plugin_path.'/includes/test.php';
   }
 
-  public function sample_admin_notice__success() {
-    ?>
-    <div class="notice notice-success is-dismissible">
-        <p><?php _e( 'Done!', 'sample-text-domain' ); ?></p>
-    </div>
-    <?php
+  public function inbox_page() {
+    include $this->plugin_path.'/includes/inbox.php';
   }
 
   public function register_settings()
@@ -131,6 +128,138 @@ final class MailtrapPlugin {
       $phpmailer->Password = get_option('mailtrap_password');
       $phpmailer->SMTPSecure = get_option('mailtrap_secure');
     }
+  }
+}
+
+class MailtrapAPIClient
+{
+  const BASE_URL = 'https://mailtrap.io/api/v1';
+
+  public static function getInboxes()
+  {
+    $response = wp_remote_get( self::BASE_URL.'/inboxes', [
+      'headers' => [
+          'Api-Token' => get_option('mailtrap_api_token')
+      ]
+    ]);
+
+    if ( is_array( $response ) && ! is_wp_error( $response ) ) {
+      $http_code  = $response['response']['code'];
+
+      if ($http_code != 200) {
+        throw new Exception($response['response']['message'], $http_code);
+      }
+
+      $body       = json_decode( $response['body'] );
+      return $body;
+    }
+  }
+
+  public static function getInboxMessages($id)
+  {
+    $response = wp_remote_get( self::BASE_URL.'/inboxes/'.$id.'/messages', [
+      'headers' => [
+          'Api-Token' => get_option('mailtrap_api_token')
+      ]
+    ]);
+
+    if ( is_array( $response ) && ! is_wp_error( $response ) ) {
+      $http_code  = $response['response']['code'];
+
+      if ($http_code != 200) {
+        throw new Exception($response['response']['message'], $http_code);
+      }
+
+      $body       = json_decode( $response['body'] );
+      return $body;
+    }
+  }
+
+  public static function getMessage($inbox_id, $message_id)
+  {
+    $response = wp_remote_get( self::BASE_URL.'/inboxes/'.$inbox_id.'/messages/'.$message_id, [
+      'headers' => [
+          'Api-Token' => get_option('mailtrap_api_token')
+      ]
+    ]);
+
+    if ( is_array( $response ) && ! is_wp_error( $response ) ) {
+      $http_code  = $response['response']['code'];
+
+      if ($http_code != 200) {
+        throw new Exception($response['response']['message'], $http_code);
+      }
+
+      $body       = json_decode( $response['body'] );
+      return $body;
+    }
+  }
+
+  public static function getMessageBody($inbox_id, $message_id, $format = 'html')
+  {
+    $response = wp_remote_get( self::BASE_URL.'/inboxes/'.$inbox_id.'/messages/'.$message_id.'/body.'.$format, [
+      'headers' => [
+          'Api-Token' => get_option('mailtrap_api_token')
+      ]
+    ]);
+
+    if ( is_array( $response ) && ! is_wp_error( $response ) ) {
+      $http_code  = $response['response']['code'];
+
+      if ($http_code != 200 && $http_code != 404) {
+        throw new Exception($response['response']['message'], $http_code);
+      }
+
+      if ($http_code == 404) {
+        return self::getMessageBody($inbox_id, $message_id, 'txt');
+      }
+      return $response['body'];
+    }
+  }
+
+  public static function time2str($ts)
+  {
+      if(!ctype_digit($ts))
+          $ts = strtotime($ts);
+
+      $diff = time() - $ts;
+      if($diff == 0)
+          return 'now';
+      elseif($diff > 0)
+      {
+          $day_diff = floor($diff / 86400);
+          if($day_diff == 0)
+          {
+              if($diff < 60) return 'just now';
+              if($diff < 120) return '1 minute ago';
+              if($diff < 3600) return floor($diff / 60) . ' minutes ago';
+              if($diff < 7200) return '1 hour ago';
+              if($diff < 86400) return floor($diff / 3600) . ' hours ago';
+          }
+          if($day_diff == 1) return 'Yesterday';
+          if($day_diff < 7) return $day_diff . ' days ago';
+          if($day_diff < 31) return ceil($day_diff / 7) . ' weeks ago';
+          if($day_diff < 60) return 'last month';
+          return date('F Y', $ts);
+      }
+      else
+      {
+          $diff = abs($diff);
+          $day_diff = floor($diff / 86400);
+          if($day_diff == 0)
+          {
+              if($diff < 120) return 'in a minute';
+              if($diff < 3600) return 'in ' . floor($diff / 60) . ' minutes';
+              if($diff < 7200) return 'in an hour';
+              if($diff < 86400) return 'in ' . floor($diff / 3600) . ' hours';
+          }
+          if($day_diff == 1) return 'Tomorrow';
+          if($day_diff < 4) return date('l', $ts);
+          if($day_diff < 7 + (7 - date('w'))) return 'next week';
+          if(ceil($day_diff / 7) < 4) return 'in ' . ceil($day_diff / 7) . ' weeks';
+          if(date('n', $ts) == date('n') + 1) return 'next month';
+          return date('F Y', $ts);
+      }
   }
 }
 
