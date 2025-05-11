@@ -51,6 +51,25 @@ final class MailtrapPlugin {
     $this->plugin_url    = plugins_url( '/', __FILE__ );
     $this->plugin_path   = plugin_dir_path( __FILE__ );
 
+    // Start session for debugging if not already started
+    if (!session_id() && !headers_sent()) {
+      session_start();
+    }
+    
+    // Clear debug log if requested
+    if (isset($_GET['clear_debug']) && $_GET['clear_debug'] == 1) {
+      unset($_SESSION['mailtrap_debug_log']);
+      wp_redirect(remove_query_arg('clear_debug'));
+      exit;
+    }
+    
+    // Clear error log if requested
+    if (isset($_GET['clear_errors']) && $_GET['clear_errors'] == 1) {
+      unset($_SESSION['mailtrap_errors']);
+      wp_redirect(remove_query_arg('clear_errors'));
+      exit;
+    }
+
     add_action( 'phpmailer_init', array($this, 'mailer_setup' ) );
     add_action( 'admin_menu', array($this, 'menu_setup' ) );
     add_action( 'admin_init', array($this, 'register_settings') );
@@ -69,8 +88,22 @@ final class MailtrapPlugin {
   }
 
   public function wp_mail_failed($wp_error) {
+    $error_message = $wp_error->get_error_message();
+    
+    // Log the error to debug.log if debug is enabled
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+      error_log('MAILTRAP EMAIL ERROR: ' . $error_message);
+    }
+    
+    // Store in session for display
+    if (!isset($_SESSION['mailtrap_errors'])) {
+      $_SESSION['mailtrap_errors'] = array();
+    }
+    $_SESSION['mailtrap_errors'][] = $error_message;
+    
+    // Display error message
     echo sprintf('<div class="notice notice-error"><p>%s</p></div>',
-      __( 'Email Delivery Failure:').$wp_error->get_error_message()
+      __( 'Email Delivery Failure:') . $error_message
     );
   }
 
@@ -96,7 +129,11 @@ final class MailtrapPlugin {
         die( 'Failed security check' );
       }
 
-      $email_sent = wp_mail( $_POST['to'], __( 'Mailtrap for Wordpress Plugin', 'mailtrap-for-wp' ), $_POST['message']);
+      $headers = array(
+        'From: ' . wp_get_current_user()->display_name . ' <' . $_POST['from'] . '>'
+      );
+      
+      $email_sent = wp_mail( $_POST['to'], __( 'Mailtrap for Wordpress Plugin', 'mailtrap-for-wp' ), $_POST['message'], $headers);
     }
 
     include $this->plugin_path.'/includes/test.php';
@@ -109,11 +146,14 @@ final class MailtrapPlugin {
   public function register_settings()
   {
     register_setting( 'mailtrap-settings', 'mailtrap_enabled' );
+    register_setting( 'mailtrap-settings', 'mailtrap_host' );
     register_setting( 'mailtrap-settings', 'mailtrap_port' );
     register_setting( 'mailtrap-settings', 'mailtrap_username' );
     register_setting( 'mailtrap-settings', 'mailtrap_password' );
     register_setting( 'mailtrap-settings', 'mailtrap_secure' );
     register_setting( 'mailtrap-settings', 'mailtrap_api_token' );
+    register_setting( 'mailtrap-settings', 'mailtrap_isDebug' );
+    register_setting( 'mailtrap-settings', 'mailtrap_base_url' );
   }
 
   public function mailer_setup($phpmailer)
@@ -121,23 +161,44 @@ final class MailtrapPlugin {
     if(get_option('mailtrap_enabled', false))
     {
       $phpmailer->IsSMTP();
-      $phpmailer->Host = 'smtp.mailtrap.io';
+      $phpmailer->Host = get_option('mailtrap_host', 'live.smtp.mailtrap.io');
       $phpmailer->SMTPAuth = true;
       $phpmailer->Port = get_option('mailtrap_port');
       $phpmailer->Username = get_option('mailtrap_username');
       $phpmailer->Password = get_option('mailtrap_password');
       $phpmailer->SMTPSecure = get_option('mailtrap_secure');
+      $phpmailer->setFrom(get_option('admin_email'));
+      
+      // Enable SMTP debugging based on setting
+      $phpmailer->SMTPDebug = intval(get_option('mailtrap_isDebug', 0)); // 0-4, default 1
+      $phpmailer->Debugoutput = function($str, $level) {
+        // Log to WordPress debug.log
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+          error_log('MAILTRAP SMTP DEBUG: ' . $str);
+        }
+        // Also store in a session variable for display in admin area
+        if (!isset($_SESSION['mailtrap_debug_log'])) {
+          $_SESSION['mailtrap_debug_log'] = '';
+        }
+        $_SESSION['mailtrap_debug_log'] .= $str . "\n";
+      };
     }
   }
 }
 
 class MailtrapAPIClient
 {
-  const BASE_URL = 'https://mailtrap.io/api/v1';
+  public static function get_base_url() {
+    $url = get_option('mailtrap_base_url');
+    if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
+      return rtrim($url, '/');
+    }
+    return 'https://mailtrap.io/api/v1';
+  }
 
   public static function getInboxes()
   {
-    $response = wp_remote_get( self::BASE_URL.'/inboxes', [
+    $response = wp_remote_get( self::get_base_url().'/inboxes', [
       'headers' => [
           'Api-Token' => get_option('mailtrap_api_token')
       ]
@@ -157,7 +218,7 @@ class MailtrapAPIClient
 
   public static function getInboxMessages($id)
   {
-    $response = wp_remote_get( self::BASE_URL.'/inboxes/'.$id.'/messages', [
+    $response = wp_remote_get( self::get_base_url().'/inboxes/'.$id.'/messages', [
       'headers' => [
           'Api-Token' => get_option('mailtrap_api_token')
       ]
@@ -177,7 +238,7 @@ class MailtrapAPIClient
 
   public static function getMessage($inbox_id, $message_id)
   {
-    $response = wp_remote_get( self::BASE_URL.'/inboxes/'.$inbox_id.'/messages/'.$message_id, [
+    $response = wp_remote_get( self::get_base_url().'/inboxes/'.$inbox_id.'/messages/'.$message_id, [
       'headers' => [
           'Api-Token' => get_option('mailtrap_api_token')
       ]
@@ -197,7 +258,7 @@ class MailtrapAPIClient
 
   public static function getMessageBody($inbox_id, $message_id, $format = 'html')
   {
-    $response = wp_remote_get( self::BASE_URL.'/inboxes/'.$inbox_id.'/messages/'.$message_id.'/body.'.$format, [
+    $response = wp_remote_get( self::get_base_url().'/inboxes/'.$inbox_id.'/messages/'.$message_id.'/body.'.$format, [
       'headers' => [
           'Api-Token' => get_option('mailtrap_api_token')
       ]
