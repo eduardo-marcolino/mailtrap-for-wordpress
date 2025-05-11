@@ -9,6 +9,10 @@
     
     <table class="form-table">
         <tr>
+          <th scope="row"><?php echo __( 'From', 'mailtrap-for-wp' ) ?></th>
+          <td><input type="email" name="from" value="<?php echo get_option('admin_email')?>"/></td>
+        </tr>
+        <tr>
           <th scope="row"><?php echo __( 'To', 'mailtrap-for-wp' ) ?></th>
           <td><input type="email" name="to" value="<?php echo get_option('admin_email')?>"/></td>
         </tr>
@@ -22,4 +26,14 @@
         </tr>
     </table>
   </form>
+  
+  <?php if (isset($_SESSION['mailtrap_debug_log']) && !empty($_SESSION['mailtrap_debug_log'])): ?>
+  <div class="mailtrap-debug-log">
+    <h3><?php echo __( 'SMTP Debug Log', 'mailtrap-for-wp' ) ?></h3>
+    <pre style="background: #f0f0f0; padding: 10px; overflow: auto; max-height: 300px;"><?php echo esc_html($_SESSION['mailtrap_debug_log']); ?></pre>
+    <p>
+      <a href="<?php echo admin_url('admin.php?page=mailtrap-test&clear_debug=1'); ?>" class="button"><?php echo __( 'Clear Debug Log', 'mailtrap-for-wp' ) ?></a>
+    </p>
+  </div>
+  <?php endif; ?>
 </div>
