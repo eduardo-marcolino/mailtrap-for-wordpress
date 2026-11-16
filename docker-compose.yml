@@ -1,37 +1,26 @@
-version: '3'
+# Local development only. Do not use these credentials or settings in production.
 services:
   wordpress:
-    image: wordpress:latest
-    container_name: mailtrap-web
+    image: wordpress:php8.3-apache
     ports:
-      - "8007:80"
+      - '127.0.0.1:8007:80'
     volumes:
       - .:/var/www/html/wp-content/plugins/mailtrap-for-wp
     environment:
       WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_NAME: mailtrap
-      WORDPRESS_DB_USER: root
-      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: local-wordpress-only
     depends_on:
       - db
-    networks:
-      - mailtrap
   db:
-    image: mysql
-    container_name: mailtrap-db
-    networks:
-      - mailtrap
-    ports:
-      - "3306:3306"
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: local-wordpress-only
+      MYSQL_ROOT_PASSWORD: local-root-only
     volumes:
       - data_volume:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mailtrap
-
-networks:
-  mailtrap:
-    driver: bridge
-
 volumes:
   data_volume:

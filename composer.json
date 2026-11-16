@@ -1,16 +1,10 @@
 {
-	"name"       : "eduardo-marcolino/mailtrap-for-wordpress",
-	"description": "Mailtrap for Wordpress",
-	"homepage"   : "https://github.com/eduardo-marcolino/mailtrap-for-wordpress",
-	"type"       : "wordpress-plugin",
-	"keywords"   : ["wordpress","plugin","wp","mailtrap","email test","test","smtp","fake"],
-	"license"    : "GPL-2.0+",
-	"authors"    : [{
-		"name"    : "Eduardo Marcolino",
-		"homepage": "http://eduardomarcolino.com"
-	}],
-	"require": {
-		"composer/installers": "~1.0",
-		"php": ">=5.3"
-	}
+  "name": "eduardo-marcolino/mailtrap-for-wordpress",
+  "description": "Unofficial WordPress plugin for Mailtrap Email Sandbox and transactional SMTP sending",
+  "homepage": "https://github.com/eduardo-marcolino/mailtrap-for-wordpress",
+  "type": "wordpress-plugin",
+  "keywords": ["wordpress", "smtp", "mailtrap", "email sandbox", "transactional email"],
+  "license": "GPL-2.0-or-later",
+  "authors": [{"name": "Eduardo Marcolino", "homepage": "https://github.com/eduardo-marcolino"}],
+  "require": {"php": ">=7.4", "composer/installers": "^2.2"}
 }
